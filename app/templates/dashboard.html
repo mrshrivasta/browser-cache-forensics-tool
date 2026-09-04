@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Browser Cache Forensics Tool{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<p>Real-time overview of Browser Cache Forensics Tool scans for <strong>{{ current_user.username }}</strong>.</p>
+
+<div class="grid">
+  <div class="stat-tile"><div class="value">{{ counters.total_scans }}</div><div class="label">Scans Run</div></div>
+  <div class="stat-tile"><div class="value">{{ counters.total_findings }}</div><div class="label">Findings</div></div>
+  <div class="stat-tile"><div class="value">{{ counters.total_alerts }}</div><div class="label">Alerts</div></div>
+  <div class="stat-tile"><div class="value">{{ counters.open_incidents }}</div><div class="label">Open Incidents</div></div>
+</div>
+
+<div class="card">
+  <h2>Run a New Scan</h2>
+  <p>Enter a real, readable path to a Chrome/Chromium <code>Cache_Data</code> directory (or a single cache entry file) on this machine. The Security Engine real-parses the actual Simple Cache bytes with <code>struct</code>/<code>zlib.crc32</code> — no simulated results.</p>
+  <form method="POST" action="{{ url_for('dashboard.run_scan') }}">
+    <input type="text" name="target_path" placeholder="~/.config/google-chrome/Default/Cache/Cache_Data" value="{{ default_scan_path }}">
+    <button type="submit">Run Scan</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Recent Scans</h2>
+  {% if recent_scans %}
+  <table>
+    <tr><th>ID</th><th>Path</th><th>Status</th><th>Files</th><th>Started</th></tr>
+    {% for s in recent_scans %}
+    <tr>
+      <td><a href="{{ url_for('logs.detail', scan_id=s.id) }}">#{{ s.id }}</a></td>
+      <td class="mono">{{ s.target_path }}</td>
+      <td>{{ s.status }}</td>
+      <td>{{ s.files_scanned }}</td>
+      <td>{{ s.started_at }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p>No scans yet. Run your first scan above.</p>
+  {% endif %}
+</div>
+{% endblock %}
